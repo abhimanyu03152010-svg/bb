@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Mauli!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 50%, #fe9a9a 100%);
+            font-family: 'Georgia', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            color: #4a4a4a;
+            padding: 15px 10px;
+        }
+
+        /* --- IMMERSIVE ENTRY SCREEN FOR AUTO-PLAY BYPASS --- */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.8s ease-in-out;
+        }
+        .welcome-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 35px 20px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            max-width: 90%;
+            width: 340px;
+            border: 2px solid #fff;
+        }
+        .enter-btn {
+            background: linear-gradient(45deg, #ff1a4a, #ff4b72);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 25px;
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(255, 26, 74, 0.4);
+            animation: pulse 1.8s infinite;
+        }
+
+        /* --- MOBILE LAYOUT RESPONSIVENESS --- */
+        .container {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 20px 15px;
+            width: 100%;
+            max-width: 420px; /* Perfect sizing for iPhone, Samsung, etc. */
+            box-shadow: 0 15px 40px rgba(186, 15, 52, 0.25);
+            text-align: center;
+            z-index: 2;
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
+            overflow-y: auto;
+            max-height: 92vh;
+        }
+
+        h1 {
+            color: #d11d44;
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .sub-heading {
+            font-size: 1.1rem;
+            color: #ff3366;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* --- HIGH VELOCITY POPPING BACKGROUND --- */
+        .animation-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .floating-element {
+            position: absolute;
+            bottom: -80px;
+            animation: floatUp 5s linear infinite;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .floating-heart {
+            color: rgba(255, 255, 255, 0.9);
+            filter: drop-shadow(0 0 5px rgba(255, 0, 76, 0.5));
+        }
+        .floating-text {
+            color: rgba(255, 240, 242, 0.95);
+            font-weight: bold;
+            font-style: italic;
+            font-size: 0.9rem;
+            background: rgba(255, 75, 110, 0.35);
+            padding: 4px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-115vh) scale(1.1) rotate(30deg); opacity: 0; }
+        }
+
+        /* --- MOBILE GRID & TIMERS --- */
+        .timer-container {
+            background: white;
+            padding: 12px 10px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 75, 110, 0.2);
+        }
+        .timer-title {
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .countdown {
+            display: flex;
+            justify-content: space-around;
+        }
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .time-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d11d44;
+            font-family: monospace;
+        }
+        .time-label {
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .letters-instruction {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .letter-card {
+            background: #ffffff;
+            border: 1.5px solid rgba(255, 75, 110, 0.25);
+            border-radius: 12px;
+            padding: 15px 5px;
+            cursor: pointer;
+            font-size: 1.6rem;
+            transition: all 0.2s ease;
+        }
+        .letter-card.opened {
+            background: #ffe3e8;
+            border-color: #ff1a4a;
+        }
+        .message-display-box {
+            background: #fffdfb;
+            border: 1.5px dashed #ff4b72;
+            border-left: 5px solid #d11d44;
+            padding: 15px;
+            border-radius: 12px;
+            min-height: 80px;
+            font-style: italic;
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- THE MOBILE CELEBRATION MODAL --- */
+        .birthday-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff1a4a 0%, #ff7eb3 100%);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease-in-out;
+            padding: 15px;
+        }
+        .birthday-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 35px 20px;
+            border-radius: 25px;
+            max-width: 92%;
+            width: 350px;
+            transform: scale(0.8);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #fff;
+        }
+        .birthday-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .giant-message {
+            font-size: 1.8rem;
+            color: #d11d44;
+            line-height: 1.4;
+            font-weight: bold;
+            margin-bottom: 15px;
+            animation: celebratoryScale 1.2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        @keyframes celebratoryScale {
+            0% { transform: scale(0.97); }
+            100% { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Start Invitation Overlay -->
+    <div class="welcome-overlay" id="welcomeScreen">
+        <div class="welcome-card">
+            <h2 style="color: #d11d44; font-size: 1.6rem; margin-bottom: 10px;">For My Jaan, Mauli ❤️</h2>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.4;">I have made a special birthday countdown surprise just for you. Tap below to enter...</p>
+            <button class="enter-btn" onclick="startExperience()">💝 Open Surprise 💝</button>
+        </div>
+    </div>
+
+    <!-- Active Floating Canvas -->
+    <div class="animation-container" id="animationContainer"></div>
+
+    <!-- Mobile Sized Main Layout Container -->
+    <div class="container">
+        <h1>For My Beautiful Wife, Mauli 💝</h1>
+        <div class="sub-heading">You Are My Whole World</div>
+
+        <!-- Local Audio Stream -->
+        <audio id="bgAudio" src="Dave-Raindance-ft-Tems-(Giranhypehouse.com).m4a" preload="auto"></audio>
+
+        <!-- Countdown Block -->
+        <div class="timer-container">
+            <div class="timer-title" id="timerHeader">Counting Down Every Heartbeat Until Your Birthday</div>
+            <div class="countdown">
+                <div class="time-box">
+                    <span class="time-number" id="hours">00</span>
+                    <span class="time-label">HRS</span>
+                </div>
+                <div class="time-box">
+                    <span class="time-number" id="minutes">00</span>
+                    <span class="time-label">MINS</span>
+                </div>
+                <div class="time-box">
+                    <span class="time-number" id="seconds">00</span>
+                    <span class="time-label">SECS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interaction Matrix -->
+        <div>
+            <div class="letters-instruction">✨ Tap an envelope to reveal a private message, Meri Jaan:</div>
+            <div class="letters-grid">
+                <div class="letter-card" onclick="revealSurprise(0, this)">✉️</div>
+                <div class="letter-card" onclick="revealSurprise(1, this)">✉️</div>
+                <div class="letter-card" onclick="revealSurprise(2, this)">✉️</div>
+                <div class="letter-card" onclick="revealSurprise(3, this)">✉️</div>
+                <div class="letter-card" onclick="revealSurprise(4, this)">✉️</div>
+                <div class="letter-card" onclick="revealSurprise(5, this)">✉️</div>
+            </div>
+            <div class="message-display-box" id="displayBox">
+                Choose an envelope, my queen...
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL FINALE MOBILE MODAL -->
+    <div class="birthday-overlay" id="birthdayModal">
+        <div class="modal-content">
+            <div class="giant-message">
+                I love you so much Mauli <br>&<br> Happy birthday meri jaan! ❤️ 👑
+            </div>
+            <p style="font-size: 1rem; color: #555; font-style: italic;">
+                You mean absolutely everything to me. Today, tomorrow, and forever.
+            </p>
+            <div style="font-size: 2.2rem; margin-top: 15px;">💖✨🎉🎁🎉✨💖</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. COUNTDOWN CLOCK CORE ---
+        const targetBirthday = new Date();
+        targetBirthday.setDate(targetBirthday.getDate() + 1);
+        targetBirthday.setHours(0, 0, 0, 0);
+        const countdownTime = targetBirthday.getTime();
+
+        function runTimer() {
+            const now = new Date().getTime();
+            const gap = countdownTime - now;
+
+            if (gap <= 0) {
+                document.getElementById('birthdayModal').classList.add('active');
+                document.getElementById('timerHeader').innerText = "🎉 HAPPY BIRTHDAY MERI JAAN! 🎉";
+                document.getElementById('hours').innerText = "00";
+                document.getElementById('minutes').innerText = "00";
+                document.getElementById('seconds').innerText = "00";
+                clearInterval(timerTracker);
+                return;
+            }
+
+            const hours = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((gap % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
+            document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+        }
+        const timerTracker = setInterval(runTimer, 1000);
+        runTimer();
+
+        // --- 2. SURPRISE MESSAGES ---
+        const surpriseNotes = [
+            "To the woman who makes my world brighter every single day, happy early birthday! You are my absolute everything. ❤️",
+            "Mauli, you are my heart, my soul, and my greatest adventure. I love you more than words can ever describe. 💕",
+            "Counting down every single second until we get to celebrate the most beautiful, caring, and amazing person I know—You, Meri Jaan!",
+            "Every day with you feels like an incredible gift, but tomorrow is entirely yours. Happy Birthday, my beautiful wife! 💖",
+            "Thank you for being my anchor, my absolute smile, and my forever companion. I am incredibly blessed to call you mine. 💝",
+            "May this upcoming year bring you as much boundless happiness, laughter, and pure joy as you bring into my life every day, my queen! 💘"
+        ];
+
+        function revealSurprise(index, element) {
+            const displayBox = document.getElementById('displayBox');
+            document.querySelectorAll('.letter-card').forEach(card => card.classList.remove('opened'));
+            element.classList.add('opened');
+            element.innerText = "💌";
+
+            displayBox.style.opacity = 0;
+            setTimeout(() => {
+                displayBox.innerHTML = surpriseNotes[index];
+                displayBox.style.opacity = 1;
+            }, 200);
+        }
+
+        // --- 3. HIGH DENSITY FLOATING GENERATOR ---
+        const animationContainer = document.getElementById('animationContainer');
+        const heartIcons = ['❤️', '💖', '💝', '💕', '💘', '🌹'];
+        const phraseMessages = ["I love you Mauli", "meri jaan", "My Queen 👑", "I love you Mauli", "meri jaan"];
+
+        function spawnFloatingAsset() {
+            const element = document.createElement('div');
+            element.classList.add('floating-element');
+            
+            if (Math.random() > 0.45) {
+                element.classList.add('floating-heart');
+                element.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                element.style.fontSize = (Math.random() * 22 + 18) + 'px';
+            } else {
+                element.classList.add('floating-text');
+                element.innerText = phraseMessages[Math.floor(Math.random() * phraseMessages.length)];
+            }
+            
+            element.style.left = Math.random() * 88 + 'vw';
+            element.style.animationDuration = (Math.random() * 2.5 + 3.5) + 's'; 
+            animationContainer.appendChild(element);
+
+            setTimeout(() => { element.remove(); }, 5500);
+        }
+
+        // --- 4. BYPASSING BLOCK POLICY & TIMESTAMP SYNC ---
+        const audio = document.getElementById('bgAudio');
+        const loopStart = 144; // 2:24
+        const loopEnd = 170;   // 2:50
+
+        function checkTimestamp() {
+            if (audio.currentTime >= loopEnd || audio.currentTime < loopStart) {
+                audio.currentTime = loopStart;
+            }
+        }
+
+        function startExperience() {
+            // Dismiss welcome gate screen
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            
+            // Instantly sync audio to 2:24 point and trigger play
+            audio.currentTime = loopStart;
+            audio.play();
+            
+            // Activate fast looping monitor and rapid heart generators
+            setInterval(checkTimestamp, 200);
+            setInterval(spawnFloatingAsset, 240);
+        }
+    </script>
+</body>
+</html>
